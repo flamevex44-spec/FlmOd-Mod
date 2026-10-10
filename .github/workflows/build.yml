@@ -49,6 +49,13 @@ jobs:
               maven { url = "https://maven.fabricmc.net/" }
               mavenCentral()
           }
+          loom {
+              mods {
+                  flamemod {
+                      sourceSet sourceSets.main
+                  }
+              }
+          }
           dependencies {
               minecraft "com.mojang:minecraft:${minecraft_version}"
               mappings loom.officialMojangMappings()
