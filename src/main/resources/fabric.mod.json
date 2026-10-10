@@ -1,0 +1,26 @@
+{
+  "schemaVersion": 1,
+  "id": "flamemod",
+  "version": "${version}",
+  "name": "FlameMod",
+  "description": "Client-side shield-disable detection and mace follow-up for Minecraft 1.21.11.",
+  "authors": ["flame"],
+  "contact": {},
+  "license": "MIT",
+  "icon": "assets/flamemod/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "dev.flame.flamemod.FlameMod"
+    ]
+  },
+  "mixins": [
+    "flamemod.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.15.0",
+    "fabric-api":   "*",
+    "minecraft":    "~1.21",
+    "java":         ">=21"
+  }
+}

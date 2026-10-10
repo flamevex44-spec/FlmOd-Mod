@@ -1,0 +1,74 @@
+plugins {
+    id 'fabric-loom' version "${loom_version}"
+    id 'java'
+}
+
+version = project.mod_version
+group   = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+repositories {
+    maven { url = "https://maven.fabricmc.net/" }
+    mavenCentral()
+}
+
+loom {
+    // Official Mojang mappings delivered via the mojmap layer in Loom 1.x
+    // Yarn is used as the named-symbol source; mojmap is applied at runtime.
+    // If you prefer pure mojmap, replace the mappings block with:
+    //   mappings loom.officialMojangMappings()
+    // Both are valid; Yarn is chosen here because it has wider community docs.
+    splitEnvironmentSourceSets()
+
+    mods {
+        flamemod {
+            sourceSet sourceSets.main
+        }
+    }
+}
+
+fabricApi {
+    // Automatically split Fabric API modules for the client environment.
+    configureDataGeneration()
+}
+
+dependencies {
+    // Fabric Loom will pull Minecraft + its dependencies automatically.
+    minecraft         "com.mojang:minecraft:${minecraft_version}"
+    mappings          "net.fabricmc:yarn:${yarn_mappings}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${loader_version}"
+
+    // Full Fabric API — version pinned in gradle.properties.
+    // See the comment there on the +1.21.4 suffix.
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+}
+
+java {
+    // MC 1.21.x requires Java 21.
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+    withSourcesJar()
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+    options.release  = 21
+}
+
+processResources {
+    inputs.property "version", project.version
+
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+jar {
+    from("LICENSE") {
+        rename { "${it}_${project.archives_base_name}" }
+    }
+}
