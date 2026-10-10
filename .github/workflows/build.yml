@@ -1,0 +1,70 @@
+name: Build FlameMod
+
+on:
+  push:
+    branches: [ master, main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Fix Fabric API version
+        run: sed -i 's/fabric_api_version=.*/fabric_api_version=0.141.6+1.21.11/' gradle.properties
+
+      - name: Fix build.gradle
+        run: |
+          cat > build.gradle << 'GRADLE'
+          plugins {
+              id 'fabric-loom' version '1.9.+'
+              id 'java'
+          }
+          version = project.mod_version
+          group = project.maven_group
+          base { archivesName = project.archives_base_name }
+          repositories {
+              maven { url = "https://maven.fabricmc.net/" }
+              mavenCentral()
+          }
+          dependencies {
+              minecraft "com.mojang:minecraft:${minecraft_version}"
+              mappings loom.officialMojangMappings()
+              modImplementation "net.fabricmc:fabric-loader:${loader_version}"
+              modImplementation "net.fabricmc.fabric-api:fabric-api:${fabric_api_version}"
+          }
+          java {
+              toolchain { languageVersion = JavaLanguageVersion.of(21) }
+              withSourcesJar()
+          }
+          tasks.withType(JavaCompile).configureEach {
+              options.encoding = 'UTF-8'
+              options.release = 21
+          }
+          processResources {
+              inputs.property "version", project.version
+              filesMatching("fabric.mod.json") { expand "version": project.version }
+          }
+          jar {
+              from("LICENSE") { rename { "${it}_${project.archives_base_name}" } }
+          }
+          GRADLE
+
+      - name: Grant gradlew permission
+        run: chmod +x gradlew
+
+      - name: Build
+        run: ./gradlew build --no-daemon
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: FlameMod-JAR
+          path: build/libs/*.jar
