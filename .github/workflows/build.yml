@@ -17,6 +17,11 @@ jobs:
           java-version: '21'
           distribution: 'temurin'
 
+      - name: Set up Gradle 8.10
+        uses: gradle/actions/setup-gradle@v3
+        with:
+          gradle-version: '8.10'
+
       - name: Rewrite gradle.properties
         run: |
           cat > gradle.properties << 'PROPS'
@@ -27,7 +32,7 @@ jobs:
           minecraft_version=1.21.1
           loader_version=0.16.14
           fabric_api_version=0.104.0+1.21.1
-          loom_version=1.7.4
+          loom_version=1.8.+
           PROPS
 
       - name: Rewrite build.gradle
@@ -71,7 +76,7 @@ jobs:
         run: chmod +x gradlew
 
       - name: Build
-        run: ./gradlew build --no-daemon
+        run: gradle build --no-daemon
 
       - name: Upload JAR
         uses: actions/upload-artifact@v4
